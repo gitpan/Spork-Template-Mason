@@ -1,39 +1,58 @@
 package Spork::Template::Mason;
 
 use strict;
+use warnings;
 
 use vars qw($VERSION);
 
 use Spoon::Template::Mason '-base';
 use Spoon::Installer '-base';
 
-$VERSION = 0.01;
+$VERSION = 0.02;
 
+sub extract_to
+{
+    my $self = shift;
+    $self->hub->config->template_directory;
+}
+
+sub include_path
+{
+    my $self = shift;
+    $self->hub->config->template_path ||
+        $self->hub->config->template_directory;
+}
 
 1;
 
 __DATA__
-__template/autohandler__
+__autohandler__
 <& top.mas, %ARGS &>
 % $m->call_next;
 <& bottom.mas, %ARGS &>
-__template/top.mas__
+__top.mas__
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 <html>
 <head>
 <title><% $slide_heading | h %></title>
-<meta name="Content-Type" content="text/html; charset=utf-8">
+<meta name="Content-Type" content="text/html; charset=<% $character_encoding %>">
 <meta name="generator" content="<% $spork_version | h %>">
 <link rel='stylesheet' href='slide.css' type='text/css'>
 <link rel='icon' HREF='favicon.png'>
+<style><!--
+<& slide.css, %ARGS &>
+--></style>
+<script>
+<& controls.js, %ARGS &>
+</script>
 </head>
 <body bgcolor="#ffffff" background="<% $background_image | h %>">
 <div id="topbar">
 <table width='100%'>
     <tr>
-        <td width="13%"><img src="<% $presentation_graphic | h %>"></td>
+        <td width="13%"><% $presentation_topic | h %></td>
         <td align="center" width="73%">
-            <a href="<% $index_slide | h %>"><% $presentation_title | h %></a>
+            <a accesskey="s" href="<% $index_slide | h %>"><% $presentation_title | h %></a>
         </td>
         <td align="right" width="13%">
 % if ($slide_num) {
@@ -47,21 +66,24 @@ __template/top.mas__
 <%args>
 $slide_heading => ''
 $spork_version => ''
+$character_encoding => 'utf-8'
 $background_image => ''
 $index_slide => ''
-$presentation_graphic => ''
+$presentation_topic => ''
 $presentation_title => ''
 $slide_num => 0
 </%args>
-__template/bottom.mas__
+__bottom.mas__
 <div id="bottombar">
 <table width="100%">
     <tr>
         <td align="left" valign="middle">
+            <div<% $show_controls ? '' : ' style="display:none"' %>>
+
 <&| .no_empty_links &>
-            <a href="<% $prev_slide | h %>">&lt;&lt; Previous</a> |
-            <a href="<% $index_slide | h %>">Index</a> |
-            <a href="<% $next_slide %>">Next &gt;&gt;</a>
+            <a accesskey='p' href="<% $prev_slide | h %>"><% $link_previous | h %></a> |
+            <a accesskey='i' href="<% $index_slide | h %>"><% $link_index | h %></a> |
+            <a accesskey='n' href="<% $next_slide %>"><% $link_next | h %></a>
 </&>
         </td>
         <td align="right" valign="middle">
@@ -69,8 +91,10 @@ __template/bottom.mas__
         </td>
     </tr>
 </table>
-</div> 
+</div>
+<a name="end"></a>
 <div id="logo" />
+<div id="spacer"></div>
 
 </body>
 </html>
@@ -80,6 +104,10 @@ $prev_slide => ''
 $index_slide => ''
 $next_slide => ''
 $copyright_string
+$show_controls => 0
+$link_previous => ''
+$link_index => ''
+$link_next => ''
 </%args>
 
 <%init>
@@ -94,7 +122,7 @@ my $c = $m->content;
 $c =~ s{<a href="">([^<]+)</a>}{$1}g;
 </%init>
 </%def>
-__template/index.html__
+__index.html__
 <div id="content"><p />
 <ol>
 % foreach my $slide (@slides) {
@@ -106,7 +134,7 @@ __template/index.html__
 <%args>
 @slides
 </%args>
-__template/start.html__
+__start.html__
 <div id="content"><p />
 <center>
 <h4><% $presentation_title | h %></h4>
@@ -126,7 +154,7 @@ $author_email => ''
 $presentation_place => ''
 $presentation_date => ''
 </%args>
-__template/slide.html__
+__slide.html__
 <div id="content"><p />
 <% $image_html %>
 <% $slide_content %>
@@ -140,7 +168,7 @@ $image_html
 $slide_content
 $last
 </%args>
-__template/slide.css__
+__slide.css__
 hr {
     color: #202040;
     height: 0px;
@@ -217,17 +245,78 @@ small {
     width: 130px;
     height: 150px;
     z-index:3;
-    background-image: url(beastie.png);
+% if ( defined $logo_image ) {
+    background-image: url(<% $images_directory %>/<% $logo_image %>);
+% }
     background-repeat: no-repeat;
 }
 
 <%args>
 $banner_bgcolor
+$images_directory => ''
+$logo_image => undef
 </%args>
 
 <%flags>
 inherit => undef
 </%flags>
+__controls.js__
+// BEGIN controls.js
+function nextSlide() {
+    window.location = '<% $next_slide %>';
+}
+
+function prevSlide() {
+    window.location = '<% $prev_slide %>';
+}
+
+function indexSlide() {
+    window.location = 'index.html';
+}
+
+function startSlide() {
+    window.location = 'start.html';
+}
+
+function closeSlide() {
+    window.close();
+}
+
+function handleKey(e) {
+    var key;
+    if (e == null) {
+        // IE
+        key = event.keyCode
+    } 
+    else {
+        // Mozilla
+        if (e.altKey || e.ctrlKey) {
+            return true
+        }
+        key = e.which
+    }
+    switch(key) {
+        case 8: prevSlide(); break
+        case 13: nextSlide(); break
+        case 32: nextSlide(); break
+        case 81: closeSlide(); break
+        case 105: indexSlide(); break
+        case 110: nextSlide(); break
+        case 112: prevSlide(); break
+        case 115: startSlide(); break
+        default: //xxx(e.which)
+    }
+}
+
+document.onkeypress = handleKey
+document.onclick = nextSlide
+// END controls.js
+
+<%args>
+$prev_slide => ''
+$next_slide => ''
+</%args>
+
 
 __END__
 
