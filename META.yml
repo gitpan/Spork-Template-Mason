@@ -1,0 +1,15 @@
+--- #YAML:1.0
+name: Spork-Template-Mason
+version: 0.01
+license: perl
+distribution_type: module
+requires:
+  Spoon::Template::Mason: 0.01
+recommends: {}
+build_requires: {}
+conflicts: {}
+provides:
+  Spork::Template::Mason:
+    file: lib/Spork/Template/Mason.pm
+    version: 0.01
+generated_by: Module::Build version 0.20
