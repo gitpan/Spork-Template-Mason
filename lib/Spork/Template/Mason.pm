@@ -8,7 +8,7 @@ use vars qw($VERSION);
 use Spoon::Template::Mason '-base';
 use Spoon::Installer '-base';
 
-$VERSION = 0.02;
+$VERSION = 0.03;
 
 sub extract_to
 {
