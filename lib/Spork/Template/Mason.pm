@@ -8,7 +8,9 @@ use vars qw($VERSION);
 use Spoon::Template::Mason '-base';
 use Spoon::Installer '-base';
 
-$VERSION = 0.03;
+$VERSION = 0.04;
+
+sub plugins { {} }
 
 sub extract_to
 {
@@ -16,11 +18,11 @@ sub extract_to
     $self->hub->config->template_directory;
 }
 
-sub include_path
+sub path
 {
     my $self = shift;
     $self->hub->config->template_path ||
-        $self->hub->config->template_directory;
+      [ $self->hub->config->template_directory ];
 }
 
 1;
@@ -31,38 +33,47 @@ __autohandler__
 % $m->call_next;
 <& bottom.mas, %ARGS &>
 __top.mas__
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
-<html>
+<!-- BEGIN top.mas -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <title><% $slide_heading | h %></title>
 <meta name="Content-Type" content="text/html; charset=<% $character_encoding %>">
 <meta name="generator" content="<% $spork_version | h %>">
 <link rel='stylesheet' href='slide.css' type='text/css'>
 <link rel='icon' HREF='favicon.png'>
-<style><!--
+<style>
+% if ( $hub->can('css') ) {
+%   foreach my $f ( $hub->css->files ) {
+<link rel="stylesheet" type="text/css" href="<% $f | h %>" />
+%   }
+% }
+<style type="text/css"><!--
 <& slide.css, %ARGS &>
 --></style>
-<script>
+<script type="text/javascript">
 <& controls.js, %ARGS &>
 </script>
 </head>
-<body bgcolor="#ffffff" background="<% $background_image | h %>">
+<body>
 <div id="topbar">
-<table width='100%'>
-    <tr>
-        <td width="13%"><% $presentation_topic | h %></td>
-        <td align="center" width="73%">
-            <a accesskey="s" href="<% $index_slide | h %>"><% $presentation_title | h %></a>
-        </td>
-        <td align="right" width="13%">
+ <table width='100%'>
+  <tr>
+   <td width="13%"><% $presentation_topic | h %></td>
+   <td align="center" width="73%">
+    <a accesskey="s" href="<% $index_slide | h %>"><% $presentation_title | h %></a>
+   </td>
+   <td align="right" width="13%">
 % if ($slide_num) {
-         #<% $slide_num | h %>
+    <% $slide_num | h %>
+% } else {
+    &nbsp;
 % }
-        </td>
-    </tr>
-</table>
+   </td>
+  </tr>
+ </table>
 </div>
-
+<!-- END top.html -->
 <%args>
 $slide_heading => ''
 $spork_version => ''
@@ -72,33 +83,36 @@ $index_slide => ''
 $presentation_topic => ''
 $presentation_title => ''
 $slide_num => 0
+$hub
 </%args>
 __bottom.mas__
+<!-- BEGIN bottom.html -->
 <div id="bottombar">
-<table width="100%">
-    <tr>
-        <td align="left" valign="middle">
-            <div<% $show_controls ? '' : ' style="display:none"' %>>
-
+ <table width="100%">
+  <tr>
+   <td align="left" valign="middle">
+    <div<% $show_controls ? '' : ' style="display:none"' %>>
 <&| .no_empty_links &>
-            <a accesskey='p' href="<% $prev_slide | h %>"><% $link_previous | h %></a> |
-            <a accesskey='i' href="<% $index_slide | h %>"><% $link_index | h %></a> |
-            <a accesskey='n' href="<% $next_slide %>"><% $link_next | h %></a>
+     <a accesskey='p' href="<% $prev_slide | h %>"><% $link_previous %></a> |
+     <a accesskey='i' href="<% $index_slide | h %>"><% $link_index %></a> |
+     <a accesskey='n' href="<% $next_slide %>"><% $link_next %></a>
 </&>
-        </td>
-        <td align="right" valign="middle">
-            <% $copyright_string %>
-        </td>
-    </tr>
-</table>
+    </div>
+   </td>
+   <td align="right" valign="middle">
+    <% $copyright_string %>
+   </td>
+  </tr>
+ </table>
 </div>
-<a name="end"></a>
-<div id="logo" />
-<div id="spacer"></div>
+<div id="logo"></div>
 
+<div id="spacer">
+ <a name="end"></a>
+</div>
 </body>
 </html>
-
+<!-- END bottom.html -->
 <%args>
 $prev_slide => ''
 $index_slide => ''
@@ -123,30 +137,34 @@ $c =~ s{<a href="">([^<]+)</a>}{$1}g;
 </%init>
 </%def>
 __index.html__
+<!-- BEGIN bottom.html -->
 <div id="content"><p />
-<ol>
+ <div class="top_spacer"></div>
+ <ol>
 % foreach my $slide (@slides) {
-<li> <a href="<% $slide->{slide_name} | h %>"><% $slide->{slide_heading} | h %></a>
+  <li> <a href="<% $slide->{slide_name} | h %>"><% $slide->{slide_heading} | h %></a>
 % }
-</ol>
+ </ol>
 </div>
-
+<!-- END index.html -->
 <%args>
 @slides
 </%args>
 __start.html__
+<!-- BEGIN start.html -->
 <div id="content"><p />
-<center>
-<h4><% $presentation_title | h %></h4>
-<p />
-<h4><% $author_name | h %></h4>
-<h4><% $author_email | h %></h4>
-<p />
-<h4><% $presentation_place | h %></h4>
-<h4><% $presentation_date | h %></h4>
-</center>
+ <div class="top_spacer"></div>
+ <center>
+ <h4><% $presentation_title | h %></h4>
+ <p />
+ <h4><% $author_name | h %></h4>
+ <h4><% $author_email | h %></h4>
+ <p />
+ <h4><% $presentation_place | h %></h4>
+ <h4><% $presentation_date | h %></h4>
+ </center>
 </div>
-
+<!-- END start.html -->
 <%args>
 $presentation_title
 $author_name => ''
@@ -155,20 +173,23 @@ $presentation_place => ''
 $presentation_date => ''
 </%args>
 __slide.html__
+<!-- BEGIN slide.html -->
 <div id="content"><p />
-<% $image_html %>
-<% $slide_content %>
+ <div class="top_spacer"></div>
+ <% $image_html %>
+ <% $slide_content %>
 % unless ($last) {
-<small>continued...</small>
+ <small>continued...</small>
 % }
 </div>
-
+<!-- END slide.html -->
 <%args>
 $image_html
 $slide_content
 $last
 </%args>
 __slide.css__
+/* BEGIN slide.css */
 hr {
     color: #202040;
     height: 0px;
@@ -230,6 +251,17 @@ small {
     z-index: 0;
 }
 
+.top_spacer {
+    height: 0px;
+    margin: 0px 0px 0px 0px;
+    padding: 1px 0px 0px 0px;
+}
+
+.spacer {
+    bottom: 5px;
+    height: 50px;
+}
+
 #content {
     background:#fff;
     margin-left: 20px;
@@ -250,7 +282,7 @@ small {
 % }
     background-repeat: no-repeat;
 }
-
+/* END index.css */
 <%args>
 $banner_bgcolor
 $images_directory => ''
@@ -309,12 +341,14 @@ function handleKey(e) {
 }
 
 document.onkeypress = handleKey
+% if ($mouse_controls) {
 document.onclick = nextSlide
+% }
 // END controls.js
-
 <%args>
 $prev_slide => ''
 $next_slide => ''
+$mouse_controls
 </%args>
 
 

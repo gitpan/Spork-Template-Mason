@@ -1,5 +1,5 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.38.
+signed via the Module::Signature module, version 0.39.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
@@ -14,20 +14,20 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 a9f781c417df167ad9a3ecdcc680f92a8e8f4d37 Build.PL
-SHA1 fc18149ec7d7154e8b134e10c11a98682425eff7 Changes
+SHA1 438f466242b1551f71396fccc90944228d6557b4 Build.PL
+SHA1 544a000605a6ea89cbb4a7de3340c740e4716b69 Changes
 SHA1 f235ba4160673bcb7c9d58c2f09dbc7fc0efadea LICENSE
 SHA1 89a6d659b4abbec0a57193fe139dd16abaee789e MANIFEST
 SHA1 1dc294c56d352a5b4d736514d714c1e1c8aac3fc MANIFEST.SKIP
-SHA1 a3a9b1b669c74cdd9d73a8938e92c4f354e8f04f META.yml
-SHA1 7e9e2553e95913392d02f7841987ce8b9fb01d1d Makefile.PL
+SHA1 802807615095074f9c0449d99f740af057790de9 META.yml
+SHA1 1099db72cd05ad1cad02a0b579d5f8c9786e1e92 Makefile.PL
 SHA1 cc7fc7b71a7eb13df4aea5341e12c970907c1131 README
-SHA1 442c55ced11217179680bcaab19e91d937494172 lib/Spork/Template/Mason.pm
+SHA1 8b96c1719f7d7c1393df4d3943fe4d1c9ad10416 lib/Spork/Template/Mason.pm
 SHA1 afc46f3622dfa8c341098ae093026ee30dc0863c t/01-basic.t
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.2.4 (GNU/Linux)
 
-iD8DBQFAi2Fv+4tbS/niBUoRAukfAJ4srLN9oxGtOXmxQP4LB4JuqbmMbwCffuVJ
-cSQkV6AvDCNrIS5vQV8UhlQ=
-=vlk+
+iD8DBQFA6MN23Or3ZzQuifMRAsgIAJ9WPaJ2FNmXH+XibVaHZsEQnMsdoACg11Ej
+VjAyazNmqN15GD8Imo095o4=
+=pv/r
 -----END PGP SIGNATURE-----
